@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext, useState } from 'react';
 import './App.css';
 import Header from './components/Header/Header';
 import Shop from './components/Shop/Shop';
@@ -12,38 +12,20 @@ import Review from './components/Review/Review';
 import Inventory from './components/Inventory/Inventory';
 import NotFound from './components/NotFound/NotFound';
 import ProductDetail from './components/ProductDetail/ProductDetail';
-import withFirebaseAuth from 'react-with-firebase-auth'
-import * as firebase from 'firebase/app';
-import 'firebase/auth';
-import firebaseConfig from './firebaseConfig';
-import { ProvideAuth } from "./components/Auth/use-auth";
-import Login from './components/Auth/Login';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Login from './components/Login/Login';
+import Shipment from './components/Shipment/Shipment';
+import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 
-//const firebaseApp = firebase.initializeApp(firebaseConfig);
-
+export const UserContext=createContext();
 function App(props) {
-  // const {
-  //   user,
-  //   signOut,
-  //   signInWithGoogle,
-  // } = props;
+  const[loggedInUser,setLoggedInUser]= useState({});
   return (
-    <div>
-      <ProvideAuth>
-      <Header></Header>
-      {/* {
-            user
-              ? <p>Hello, {user.displayName}</p>
-              : <p>Please sign in.</p>
-          }
-
-          {
-            user
-              ? <button onClick={signOut}>Sign out</button>
-              : <button onClick={signInWithGoogle}>Sign in with Google</button>
-          } */}
+    <UserContext.Provider value={[loggedInUser,setLoggedInUser]}>
+      <h3>email:{loggedInUser.email}</h3>
       <Router>
+      <Header></Header>
+      <Route>
         <Switch>
           <Route path="/shop">
             <Shop></Shop>
@@ -51,37 +33,29 @@ function App(props) {
           <Route path="/review">
             <Review></Review>
           </Route>
-          <Route path="/inventory">
-            <Inventory></Inventory>
+          <PrivateRoute path="/inventory">
+            <Inventory/>
+          </PrivateRoute>
+          <Route path="/login">
+            <Login/>
           </Route>
+          <PrivateRoute path="/shipment">
+            <Shipment/>
+          </PrivateRoute>
           <Route exact path="/">
             <Shop></Shop>
           </Route>
           <Route path="/product/:productKey">
             <ProductDetail></ProductDetail>
           </Route>
-          <Route path="/login">
-            <Login></Login>
-          </Route>
           <Route path="*">
             <NotFound></NotFound>
           </Route>
         </Switch>
+      </Route>
       </Router>
-      </ProvideAuth>
-    </div>
+    </UserContext.Provider>
   );
 }
-
-// const firebaseAppAuth = firebaseApp.auth();
-
-// const providers = {
-//   googleProvider: new firebase.auth.GoogleAuthProvider(),
-// };
-
-// export default withFirebaseAuth({
-//   providers,
-//   firebaseAppAuth,
-// })(App);
 
 export default App;
